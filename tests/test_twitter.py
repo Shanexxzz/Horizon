@@ -1,6 +1,7 @@
 """Tests for TwitterScraper."""
 
 import asyncio
+import json
 from datetime import datetime, timedelta, timezone
 
 import httpx
@@ -114,9 +115,11 @@ def test_successful_fetch_returns_items(monkeypatch):
     monkeypatch.setenv("APIFY_TOKEN", "test_token")
     since = datetime.now(timezone.utc) - timedelta(hours=1)
     tweets = [_tweet("1"), _tweet("2", text="Another tweet")]
+    start_payload = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         if "/runs" in request.url.path and request.method == "POST":
+            start_payload.update(json.loads(request.content))
             return httpx.Response(200, json=_run_resp())
         if "/actor-runs/" in request.url.path:
             return httpx.Response(200, json=_status_resp())
@@ -130,8 +133,52 @@ def test_successful_fetch_returns_items(monkeypatch):
     asyncio.run(client.aclose())
 
     assert len(result) == 2
+    assert start_payload["profile_urls"] == ["@karpathy"]
     assert result[0].source_type.value == "twitter"
     assert result[0].metadata["favorite_count"] == 10
+
+
+def test_run_every_days_can_skip_without_starting_actor(monkeypatch):
+    monkeypatch.setenv("APIFY_TOKEN", "test_token")
+    monkeypatch.delenv("HORIZON_FORCE_TWITTER", raising=False)
+    ordinal = datetime.now(timezone.utc).date().toordinal()
+    skip_interval = next(interval for interval in range(2, 10) if ordinal % interval)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise AssertionError(f"Actor should not start: {request.url}")
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    result = asyncio.run(
+        TwitterScraper(_make_config(run_every_days=skip_interval), client).fetch(
+            datetime.now(timezone.utc) - timedelta(hours=24)
+        )
+    )
+    asyncio.run(client.aclose())
+    assert result == []
+
+
+def test_force_twitter_overrides_run_every_days(monkeypatch):
+    monkeypatch.setenv("APIFY_TOKEN", "test_token")
+    monkeypatch.setenv("HORIZON_FORCE_TWITTER", "1")
+    tweets = [_tweet("forced")]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "/runs" in request.url.path and request.method == "POST":
+            return httpx.Response(200, json=_run_resp())
+        if "/actor-runs/" in request.url.path:
+            return httpx.Response(200, json=_status_resp())
+        if "/datasets/" in request.url.path:
+            return httpx.Response(200, json=tweets)
+        raise AssertionError(f"Unexpected: {request.url}")
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    result = asyncio.run(
+        TwitterScraper(_make_config(run_every_days=999), client).fetch(
+            datetime.now(timezone.utc) - timedelta(hours=24)
+        )
+    )
+    asyncio.run(client.aclose())
+    assert len(result) == 1
 
 
 def test_metadata_keys_aligned_for_analyzer(monkeypatch):

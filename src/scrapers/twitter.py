@@ -31,6 +31,24 @@ class TwitterScraper(BaseScraper):
         if not self.config.enabled:
             return []
 
+        force_run = os.environ.get("HORIZON_FORCE_TWITTER", "").lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if (
+            self.config.run_every_days > 1
+            and not force_run
+            and datetime.now(timezone.utc).date().toordinal()
+            % self.config.run_every_days
+            != 0
+        ):
+            logger.info(
+                "Skipping Twitter on this cycle (run_every_days=%s).",
+                self.config.run_every_days,
+            )
+            return []
+
         users = [u.strip().lstrip("@") for u in self.config.users if u.strip()]
         if not users:
             logger.debug("No Twitter users configured, skipping.")
@@ -70,7 +88,7 @@ class TwitterScraper(BaseScraper):
     ) -> tuple[Optional[str], Optional[str]]:
         payload = {
             "source_mode": "profiles",
-            "profile_urls": users,
+            "profile_urls": [f"@{user}" for user in users],
             "search_sort": "Latest",
             "max_items": max(100, self.config.fetch_limit),
         }

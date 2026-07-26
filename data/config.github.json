@@ -157,6 +157,7 @@
         "OpenAI"
       ],
       "fetch_limit": 100,
+      "run_every_days": 2,
       "category": "creator-signals",
       "fetch_reply_text": false,
       "max_replies_per_tweet": 3,

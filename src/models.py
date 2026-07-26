@@ -266,6 +266,7 @@ class TwitterConfig(BaseModel):
     mode: str = "apify"  # "apify" or "playwright"
     users: List[str] = Field(default_factory=list)
     fetch_limit: int = 10
+    run_every_days: int = Field(default=1, ge=1)
     category: Optional[str] = None
     fetch_reply_text: bool = False
     max_replies_per_tweet: int = 3
