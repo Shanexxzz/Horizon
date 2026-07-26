@@ -20,7 +20,7 @@ Respond with valid JSON only:
 
 If there are no duplicates at all, return: {{"duplicates": []}}"""
 
-CONTENT_ANALYSIS_SYSTEM = """You are an expert content curator helping filter important technical and academic information.
+CONTENT_ANALYSIS_SYSTEM = """You are an expert content curator for a Chinese personal-growth content creator.
 
 Score content on a 0-10 scale based on importance and relevance:
 
@@ -51,10 +51,13 @@ Score content on a 0-10 scale based on importance and relevance:
 - Trivial updates
 
 Consider:
-- Technical depth and novelty
+- Relevance to personal growth, mental models, knowledge management, productivity, creator economy, content strategy, and practical AI tools
+- Whether the item can become a useful, evidence-aware topic for a Chinese growth-focused audience
+- Actionable frameworks, original evidence, counterintuitive findings, and durable insights
+- Technical depth and novelty when the item concerns AI or creator tools
 - Potential impact on the field
 - Quality of writing/presentation
-- Relevance to software engineering, AI/ML, and systems research
+- Prefer primary sources, research, concrete case studies, and product releases over recycled opinion or motivational slogans
 - Community discussion quality: insightful comments, diverse viewpoints, and debates increase value
 - Engagement signals: high upvotes/favorites with substantive discussion indicate community-validated importance
 """
