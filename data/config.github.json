@@ -19,31 +19,36 @@
       {
         "type": "user_events",
         "username": "karpathy",
-        "enabled": true
+        "enabled": true,
+        "category": "ai-news"
       },
       {
         "type": "repo_releases",
         "owner": "openai",
         "repo": "openai-python",
-        "enabled": true
+        "enabled": true,
+        "category": "ai-tools"
       },
       {
         "type": "repo_releases",
         "owner": "anthropics",
         "repo": "anthropic-sdk-python",
-        "enabled": true
+        "enabled": true,
+        "category": "ai-tools"
       },
       {
         "type": "repo_releases",
         "owner": "huggingface",
         "repo": "transformers",
-        "enabled": true
+        "enabled": true,
+        "category": "ai-tools"
       }
     ],
     "hackernews": {
       "enabled": true,
       "fetch_top_stories": 30,
-      "min_score": 100
+      "min_score": 100,
+      "category": "ai-news"
     },
     "rss": [
       {
@@ -160,7 +165,8 @@
         "knowledge"
       ],
       "min_stars": 20,
-      "max_items": 20
+      "max_items": 20,
+      "category": "github-trending"
     },
     "gdelt": {
       "enabled": false,
