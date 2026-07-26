@@ -133,7 +133,11 @@ def test_successful_fetch_returns_items(monkeypatch):
     asyncio.run(client.aclose())
 
     assert len(result) == 2
-    assert start_payload["profile_urls"] == ["@karpathy"]
+    assert start_payload["source_mode"] == "search"
+    assert start_payload["from_users"] == ["karpathy"]
+    assert start_payload["search_sort"] == "Latest"
+    assert start_payload["tweet_type"] == "exclude_replies"
+    assert start_payload["since"] == since.isoformat()
     assert result[0].source_type.value == "twitter"
     assert result[0].metadata["favorite_count"] == 10
 

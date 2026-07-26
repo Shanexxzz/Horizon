@@ -63,7 +63,7 @@ class TwitterScraper(BaseScraper):
 
         logger.info(f"Fetching Twitter (Apify) for users: {users}")
 
-        run_id, dataset_id = await self._start_run(token, users)
+        run_id, dataset_id = await self._start_run(token, users, since)
         if not run_id:
             return []
 
@@ -80,16 +80,22 @@ class TwitterScraper(BaseScraper):
             if parsed:
                 items.append(parsed)
 
-        logger.info(f"Fetched {len(items)} tweets via Apify.")
+        logger.info(
+            "Fetched %s tweets via Apify from %s raw dataset rows.",
+            len(items),
+            len(raw_items),
+        )
         return items
 
     async def _start_run(
-        self, token: str, users: List[str]
+        self, token: str, users: List[str], since: datetime
     ) -> tuple[Optional[str], Optional[str]]:
         payload = {
-            "source_mode": "profiles",
-            "profile_urls": [f"@{user}" for user in users],
+            "source_mode": "search",
+            "from_users": users,
+            "since": since.astimezone(timezone.utc).isoformat(),
             "search_sort": "Latest",
+            "tweet_type": "exclude_replies",
             "max_items": max(100, self.config.fetch_limit),
         }
         url = f"{_APIFY_BASE}/acts/{self.config.actor_id}/runs?token={token}"
