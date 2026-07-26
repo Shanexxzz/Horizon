@@ -142,12 +142,25 @@
       "channels": []
     },
     "twitter": {
-      "enabled": false,
-      "users": [],
-      "fetch_limit": 10,
+      "enabled": true,
+      "mode": "apify",
+      "users": [
+        "JamesClear",
+        "naval",
+        "SahilBloom",
+        "AlexHormozi",
+        "AliAbdaal",
+        "dickiebush",
+        "Nicolascole77",
+        "karpathy",
+        "swyx",
+        "OpenAI"
+      ],
+      "fetch_limit": 100,
+      "category": "creator-signals",
       "fetch_reply_text": false,
       "max_replies_per_tweet": 3,
-      "max_tweets_to_expand": 10,
+      "max_tweets_to_expand": 0,
       "reply_min_likes": 5
     },
     "ossinsight": {
@@ -209,6 +222,7 @@
         "categories": [
           "content-growth",
           "creator-tools",
+          "creator-signals",
           "growth-news"
         ]
       },
