@@ -63,7 +63,7 @@ class TwitterScraper(BaseScraper):
 
         logger.info(f"Fetching Twitter (Apify) for users: {users}")
 
-        run_id, dataset_id = await self._start_run(token, users, since)
+        run_id, dataset_id = await self._start_run(token, users)
         if not run_id:
             return []
 
@@ -101,18 +101,15 @@ class TwitterScraper(BaseScraper):
         return items
 
     async def _start_run(
-        self, token: str, users: List[str], since: datetime
+        self, token: str, users: List[str]
     ) -> tuple[Optional[str], Optional[str]]:
         payload = {
-            "source_mode": "search",
-            "from_users": users,
-            # Scweet passes this into X's search operators, which accept dates
-            # rather than full timestamps. Exact time filtering still happens
-            # locally in _parse_item.
-            "since": since.astimezone(timezone.utc).strftime("%Y-%m-%d"),
-            # The actor recommends Top for more reliable account searches.
-            "search_sort": "Top",
-            "tweet_type": "exclude_replies",
+            # Profile timelines are the actor's dedicated path for recent
+            # account activity. Search mode returned an empty dataset even
+            # with valid structured queries; exact 24h filtering still
+            # happens locally in _parse_item.
+            "source_mode": "profiles",
+            "profile_urls": [f"@{user}" for user in users],
             "max_items": max(100, self.config.fetch_limit),
         }
         url = f"{_APIFY_BASE}/acts/{self.config.actor_id}/runs?token={token}"
