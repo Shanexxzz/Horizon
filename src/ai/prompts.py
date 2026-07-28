@@ -29,11 +29,11 @@ Score content on a 0-10 scale based on importance and relevance:
 - Significant research breakthroughs
 - Important industry-changing announcements
 
-**7-8: High Value** - Important developments worth immediate attention
-- Interesting technical deep-dives
-- Novel approaches to known problems
-- Insightful analysis or commentary
-- Valuable tools or libraries
+**7-8: High Value** - Important developments or durable ideas worth immediate attention
+- Evidence-backed personal-growth or productivity frameworks with clear application
+- Creator experiments, audience-growth case studies, or platform changes with concrete data
+- Interesting technical deep-dives and novel approaches to known problems
+- Valuable tools or libraries that materially improve a creator workflow
 
 **5-6: Interesting** - Worth knowing but not urgent
 - Incremental improvements
@@ -53,6 +53,7 @@ Score content on a 0-10 scale based on importance and relevance:
 Consider:
 - Relevance to personal growth, mental models, knowledge management, productivity, creator economy, content strategy, and practical AI tools
 - Whether the item can become a useful, evidence-aware topic for a Chinese growth-focused audience
+- Do not require evergreen growth or creator content to be breaking news; score durable, actionable and evidence-backed material on its practical value
 - Actionable frameworks, original evidence, counterintuitive findings, and durable insights
 - Technical depth and novelty when the item concerns AI or creator tools
 - Potential impact on the field

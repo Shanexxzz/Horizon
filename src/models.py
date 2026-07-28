@@ -477,6 +477,7 @@ class CategoryGroupConfig(BaseModel):
     name: Optional[str] = None
     limit: int = Field(gt=0)
     categories: List[str] = Field(min_length=1)
+    score_threshold: Optional[float] = Field(default=None, ge=0, le=10)
 
 
 class FilteringConfig(BaseModel):

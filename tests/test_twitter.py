@@ -135,9 +135,13 @@ def test_successful_fetch_returns_items(monkeypatch):
     assert len(result) == 2
     assert start_payload["source_mode"] == "search"
     assert start_payload["from_users"] == ["karpathy"]
-    assert start_payload["search_sort"] == "Latest"
+    # Scweet builds an X search query; X's since/until operators accept dates,
+    # not full ISO timestamps. "Top" is also the actor's recommended mode for
+    # reliable account searches.
+    assert start_payload["search_sort"] == "Top"
     assert start_payload["tweet_type"] == "exclude_replies"
-    assert start_payload["since"] == since.isoformat()
+    assert start_payload["since"] == since.strftime("%Y-%m-%d")
+    assert "until" not in start_payload
     assert result[0].source_type.value == "twitter"
     assert result[0].metadata["favorite_count"] == 10
 

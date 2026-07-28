@@ -85,6 +85,19 @@ class TwitterScraper(BaseScraper):
             len(items),
             len(raw_items),
         )
+        if not items:
+            no_results = [
+                row.get("noResults")
+                for row in raw_items
+                if isinstance(row, dict) and row.get("noResults")
+            ]
+            sample_keys = sorted(raw_items[0].keys()) if raw_items and isinstance(raw_items[0], dict) else []
+            logger.warning(
+                "Apify returned no usable tweets (dataset_rows=%s, no_results=%s, sample_keys=%s).",
+                len(raw_items),
+                no_results[:3],
+                sample_keys,
+            )
         return items
 
     async def _start_run(
@@ -93,8 +106,12 @@ class TwitterScraper(BaseScraper):
         payload = {
             "source_mode": "search",
             "from_users": users,
-            "since": since.astimezone(timezone.utc).isoformat(),
-            "search_sort": "Latest",
+            # Scweet passes this into X's search operators, which accept dates
+            # rather than full timestamps. Exact time filtering still happens
+            # locally in _parse_item.
+            "since": since.astimezone(timezone.utc).strftime("%Y-%m-%d"),
+            # The actor recommends Top for more reliable account searches.
+            "search_sort": "Top",
             "tweet_type": "exclude_replies",
             "max_items": max(100, self.config.fetch_limit),
         }

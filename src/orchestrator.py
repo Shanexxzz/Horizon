@@ -29,6 +29,7 @@ from .ai.analyzer import ContentAnalyzer
 from .ai.summarizer import DailySummarizer
 from .ai.enricher import ContentEnricher
 from .ai.tokens import get_usage_snapshot
+from .time_utils import report_date
 
 
 _TRACKING_QUERY_PARAMETERS = {
@@ -254,7 +255,7 @@ class HorizonOrchestrator:
             await self._enrich_important_items(important_items)
 
             # 7. Generate and save daily summaries for each configured language
-            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            today = report_date()
             for lang in self.config.ai.languages:
                 summarizer = DailySummarizer()
                 summary = await summarizer.generate_summary(important_items, today, len(all_items), language=lang)
@@ -338,7 +339,7 @@ class HorizonOrchestrator:
             # Send webhook failure notification if configured
             if self.webhook_notifier:
                 await self.webhook_notifier.send_failure(
-                    date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                    date=report_date(),
                     error_message=str(e),
                 )
 
@@ -647,17 +648,38 @@ class HorizonOrchestrator:
             if threshold is not None
             else self.config.filtering.ai_score_threshold
         )
-        threshold_items = [
-            item
-            for item in items
-            if item.ai_score is not None and item.ai_score >= effective_threshold
-        ]
+
+        category_thresholds: Dict[str, float] = {}
+        if threshold is None:
+            for group in self.config.filtering.category_groups.values():
+                if group.score_threshold is None:
+                    continue
+                for category in group.categories:
+                    category_thresholds.setdefault(category, group.score_threshold)
+
+        def passes_score_threshold(item: ContentItem) -> bool:
+            if item.ai_score is None:
+                return False
+            category = item.metadata.get("category")
+            item_threshold = (
+                category_thresholds.get(category, effective_threshold)
+                if isinstance(category, str)
+                else effective_threshold
+            )
+            return item.ai_score >= item_threshold
+
+        threshold_items = [item for item in items if passes_score_threshold(item)]
         threshold_items.sort(key=lambda item: item.ai_score or 0, reverse=True)
 
         if log:
-            self.console.print(
-                f"⭐️ {len(threshold_items)} items scored ≥ {effective_threshold}\n"
-            )
+            if category_thresholds:
+                self.console.print(
+                    f"⭐️ {len(threshold_items)} items passed configured score thresholds\n"
+                )
+            else:
+                self.console.print(
+                    f"⭐️ {len(threshold_items)} items scored ≥ {effective_threshold}\n"
+                )
 
         deduped_items = threshold_items
         if topic_dedup and deduped_items:

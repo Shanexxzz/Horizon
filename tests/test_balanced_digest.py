@@ -46,6 +46,65 @@ def test_unconfigured_balanced_digest_preserves_old_behavior() -> None:
     assert result.items is items
 
 
+def test_filter_items_uses_group_specific_score_thresholds() -> None:
+    filtering = FilteringConfig(
+        ai_score_threshold=6.5,
+        category_groups={
+            "growth": CategoryGroupConfig(
+                limit=6,
+                categories=["personal-growth"],
+                score_threshold=5.5,
+            ),
+            "ai": CategoryGroupConfig(
+                limit=8,
+                categories=["ai-tools"],
+            ),
+        },
+    )
+    items = [
+        make_item("growth-keep", 5.8, "personal-growth"),
+        make_item("growth-drop", 5.4, "personal-growth"),
+        make_item("ai-keep", 7.0, "ai-tools"),
+        make_item("ai-drop", 6.0, "ai-tools"),
+    ]
+
+    result = asyncio.run(
+        make_orchestrator(filtering).filter_items(
+            items,
+            topic_dedup=False,
+            apply_balance=False,
+            log=False,
+        )
+    )
+
+    assert [item.id for item in result.items] == ["ai-keep", "growth-keep"]
+
+
+def test_explicit_threshold_overrides_group_specific_thresholds() -> None:
+    filtering = FilteringConfig(
+        ai_score_threshold=6.5,
+        category_groups={
+            "growth": CategoryGroupConfig(
+                limit=6,
+                categories=["personal-growth"],
+                score_threshold=5.5,
+            )
+        },
+    )
+
+    result = asyncio.run(
+        make_orchestrator(filtering).filter_items(
+            [make_item("growth", 5.8, "personal-growth")],
+            threshold=7.0,
+            topic_dedup=False,
+            apply_balance=False,
+            log=False,
+        )
+    )
+
+    assert result.items == []
+
+
 def test_category_groups_apply_limits_and_default_group_limit() -> None:
     filtering = FilteringConfig(
         category_groups={

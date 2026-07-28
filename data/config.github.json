@@ -215,7 +215,8 @@
           "mental-models",
           "knowledge-work",
           "productivity"
-        ]
+        ],
+        "score_threshold": 5.5
       },
       "creator": {
         "name": "内容与增长",
@@ -225,7 +226,8 @@
           "creator-tools",
           "creator-signals",
           "growth-news"
-        ]
+        ],
+        "score_threshold": 5.5
       },
       "ai": {
         "name": "AI与工具",
@@ -234,7 +236,8 @@
           "ai-news",
           "ai-tools",
           "github-trending"
-        ]
+        ],
+        "score_threshold": 6.5
       }
     },
     "default_group": "other",
